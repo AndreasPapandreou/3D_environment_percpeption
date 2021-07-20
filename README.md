@@ -1,10 +1,22 @@
 # README #
 
-### What is this repository for? ###
+## Intro ##
 
 * Quick summary
 
-### How do I get set up? ###
+## Pipeline ##
+The pipeline has been split into two stages as you can observe from the next figures:
+
+**Part A**
+
+![alt text](https://github.com/AndreasPapandreou/3D_environment_percpeption/blob/master/res/pipeline_parta.png?raw=true)
+
+**Part B**
+
+![alt text](https://github.com/AndreasPapandreou/3D_environment_percpeption/blob/master/res/pipeline_partb.png?raw=true)
+
+
+## How do I get set up? ##
 
 The project runs in linux distribution using the CLion IDE, so the next steps are referred to any linux system.
 
@@ -26,7 +38,7 @@ The project runs in linux distribution using the CLion IDE, so the next steps ar
 5. Add pcl from http://www.pointclouds.org/documentation/tutorials/compiling_pcl_posix.php.
 6. Add eigen from https://dritchie.github.io/csci2240/assignments/eigen_tutorial.pdf.
 
-### User inputs
+## User inputs ##
 
 1. User must define two inputs in main. The first argument should be the path to binary lidar data and the second one
 must be the path to classifier model.
@@ -35,3 +47,5 @@ must be the path to classifier model.
    ### Some explanations about ranger
 1. How to train classifier :
    ./ranger --verbose --file path/to/file.dat --depvarname type --treetype 1 --ntree 1000 --nthreads 8 --write ranger_out.forest
+
+## Results ##
