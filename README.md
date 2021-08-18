@@ -1,19 +1,18 @@
-# README #
+# 3D environment percpeption #
 
 ## Intro ##
+This repository contains my master thesis at the University. A robust method for road curb detection is proposed, by correlating the outputs of different perception modules, through a temporal correlation  between consecutive frames. These modules consist of the sensors of Light Detection and Ranging (Lidar), Global Positioning System (GPS) and Inertial Measurement Unit (IMU). As soon as the road has been detected, a 3D point cloud semantic classification approach using multiscale features with a consistent geometrical meaning is proposed to detect the objects that exist above the road. Finally, several experiments have been conducted using data from both real and simulated environments as you can see from the video in the last section.
 
-* Quick summary
-
-## Pipeline ##
+## Architecture ##
 The pipeline has been split into two stages as you can observe from the next figures:
 
 **Part A**
 
-![alt text](https://github.com/AndreasPapandreou/3D_environment_percpeption/blob/master/res/pipeline_parta.png?raw=true)
+![alt text](https://github.com/AndreasPapandreou/3D_environment_percpeption/blob/master/res/pipeline_parta.jpg?raw=true)
 
 **Part B**
 
-![alt text](https://github.com/AndreasPapandreou/3D_environment_percpeption/blob/master/res/pipeline_partb.png?raw=true)
+![alt text](https://github.com/AndreasPapandreou/3D_environment_percpeption/blob/master/res/pipeline_partb.jpg?raw=true)
 
 
 ## How do I get set up? ##
@@ -49,3 +48,5 @@ must be the path to classifier model.
    ./ranger --verbose --file path/to/file.dat --depvarname type --treetype 1 --ntree 1000 --nthreads 8 --write ranger_out.forest
 
 ## Results ##
+
+
