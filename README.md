@@ -14,6 +14,8 @@ The pipeline has been split into two stages as you can observe from the next fig
 
 ![alt text](https://github.com/AndreasPapandreou/3D_environment_percpeption/blob/master/res/pipeline_partb.jpg?raw=true)
 
+## Results ##
+Check the video from here https://www.dropbox.com/s/7cmplaw6vdsreyd/demo.mp4?dl=0.
 
 ## How do I get set up? ##
 
@@ -46,7 +48,4 @@ must be the path to classifier model.
    ### Some explanations about ranger
 1. How to train classifier :
    ./ranger --verbose --file path/to/file.dat --depvarname type --treetype 1 --ntree 1000 --nthreads 8 --write ranger_out.forest
-
-## Results ##
-
 
