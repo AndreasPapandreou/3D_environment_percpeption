@@ -44,8 +44,10 @@
 #include "CurbDetection.h"
 #include "Clustering.h"
 
-#define TRAINING 0
-#define TESTING 0
+#define TRAINING_USING_LYFT 0
+#define TRAINING_USING_CARLA 1
+#define TESTING_USING_LYFT 0
+#define TESTING_USING_CARLA 1
 #define SIMPLE_RUN 1
 #define SIMPLE_RUN_WITH_CLASSIFIER_ONLY 0
 #define RECORD 0
@@ -160,11 +162,9 @@ int main(int argc, char **argv)
     catToInt["vehicle"] = 0; catToInt["walker"] = 1; catToInt["road"] = 2;
     VecArray vehicle, walker, road;
 
-#if TRAINING == 1
+#if TRAINING_USING_LYFT == 1
     /// read lyft data
-    /*
     std::string JsonFile = hp.getCurrentDir()+jsonLidarSmall;
-//    std::string JsonFile = hp.getCurrentDir()+jsonLidarBig;
     std::string readRes = dh_lyft.ReadJson(JsonFile);
     dh_lyft.ParseJson(readRes, pathTolyftData);
 
@@ -177,7 +177,7 @@ int main(int argc, char **argv)
 
     /// choose specific sample
     const int frame_id = 335;
-=
+
     /// show camera images
     Sample current_sample = samples[frame_id];
     showImages("Images", current_sample);
@@ -207,8 +207,9 @@ int main(int argc, char **argv)
     /// transform lidar data to global coordinates (into the ego vehicle frame)
     dh_lyft.TransformToGlobalCoord(pointsLidarTop, pointsSizeLidarTop/sizeof(float), vec(egoPos.x, egoPos.y, egoPos.z));
     /// ****************************************************************************************************************
-    */
+#endif
 
+#if TRAINING_USING_CARLA == 1
     /// ************************************************************************************************************
     /// read lidar top data from carla
     /// ************************************************************************************************************
@@ -243,7 +244,6 @@ int main(int argc, char **argv)
                     "verticalMomentSecondOrder pointsNumber\n";
 
     int numVehicles{0}, numWalkers{0}, numRoads{0};
-//    int thresVehicles{500}, thresWalkers{500}, thresRoads{500};
     int thresVehicles{1}, thresWalkers{1};
     Helpers hp;
 
@@ -283,41 +283,6 @@ int main(int argc, char **argv)
         /// find points of vehicles inside box
         VecArray eachBox;
 
-//        for (unsigned int i=0; i<vehicleCorners.size(); i+=8) {
-//            eachBox.clear();
-//            eachBox.emplace_back(vehicleCorners[i]); eachBox.emplace_back(vehicleCorners[i+1]);
-//            eachBox.emplace_back(vehicleCorners[i+2]); eachBox.emplace_back(vehicleCorners[i+3]);
-//            eachBox.emplace_back(vehicleCorners[i+4]); eachBox.emplace_back(vehicleCorners[i+5]);
-//            eachBox.emplace_back(vehicleCorners[i+6]); eachBox.emplace_back(vehicleCorners[i+7]);
-//
-//            /// find the points that fall in each box
-//            int num{0};
-//            VecArray tmpV;
-//            for (auto p: points) {
-//                if (hp.pointInBox(p, eachBox)) {
-//                    tmpV.emplace_back(p);
-//                    num++;
-//                }
-//            }
-//            if (num >= minPointsVehicle) {
-//                if (numVehicles < thresVehicles) {
-//
-//                    /// to remove
-//                    vehicle.clear();
-//
-//                    for (auto& v : tmpV)
-//                        vehicle.emplace_back(v);
-//
-//                    /// extract features for this object
-//                    debug.clear();
-//                    Box3D box(eachBox, "vehicle");
-//                    setCarlaDataForTraining(vehicle, box, debug, trainingData);
-//                    numVehicles++;
-//                }
-//            }
-//        }
-
-
         /// find points of walkers inside box
         for (unsigned int i=0; i<walkerCorners.size(); i+=8) {
             eachBox.clear();
@@ -348,57 +313,15 @@ int main(int argc, char **argv)
                 }
             }
         }
-//
-//        /// find points of roads inside box
-//        for (unsigned int i=0; i<roadCorners.size(); i+=8) {
-//            eachBox.clear();
-//            eachBox.emplace_back(roadCorners[i]); eachBox.emplace_back(roadCorners[i+1]);
-//            eachBox.emplace_back(roadCorners[i+2]); eachBox.emplace_back(roadCorners[i+3]);
-//            eachBox.emplace_back(roadCorners[i+4]); eachBox.emplace_back(roadCorners[i+5]);
-//            eachBox.emplace_back(roadCorners[i+6]); eachBox.emplace_back(roadCorners[i+7]);
-//
-//            /// find the points that fall in each box
-//            int num{0};
-//            VecArray tmpR;
-//            for (auto p: points) {
-//                if (hp.pointInBox(p, eachBox)) {
-//                    if (p.z <= -2.9) { /// TODO need to validate function hp.pointInBox in order to remove this threshold
-//                        tmpR.emplace_back(p);
-//                        num++;
-//                    }
-//                }
-//            }
-//            if (num >= minPointsRoad) {
-//                if (numRoads < thresRoads) {
-//                    for (auto& v : tmpR)
-//                        road.emplace_back(v);
-//
-//                    /// extract features for this object
-//                    debug.clear();
-//                    Box3D box(eachBox, "road");
-//                    setCarlaDataForTraining(road, box, debug, trainingData);
-//                    numRoads++;
-//                }
-//            }
-//        }
-//        iteration++;
     }
 
     std::cout << "debug size = " << debug.size() << std::endl;
 
-    /// store results to file
-//    std::ofstream myfile;
-//    myfile.open ("data/trainingData.dat");
-//    myfile << trainingData.str();
-//    myfile.close();
-    /// ************************************************************************************************************
 #endif
 
-#if TESTING == 1
+#if TESTING_USING_LYFT == 1
     /// read lyft data
-    /*
     std::string JsonFile = hp.getCurrentDir()+jsonLidarSmall;
-//    std::string JsonFile = hp.getCurrentDir()+jsonLidarBig;
     std::string readRes = dh_lyft.ReadJson(JsonFile);
     dh_lyft.ParseJson(readRes, pathTolyftData);
 
@@ -411,7 +334,6 @@ int main(int argc, char **argv)
 
     /// choose specific sample
     const int frame_id = 335;
-//    const int frame_id = 255;
 
     /// show camera images
     Sample current_sample = samples[frame_id];
@@ -442,8 +364,9 @@ int main(int argc, char **argv)
     /// transform lidar data to global coordinates (into the ego vehicle frame)
     dh_lyft.TransformToGlobalCoord(pointsLidarTop, pointsSizeLidarTop/sizeof(float), vec(egoPos.x, egoPos.y, egoPos.z));
     /// ****************************************************************************************************************
-    */
+#endif
 
+#if TESTING_USING_CARLA == 1
     /// ************************************************************************************************************
     /// read lidar top data from carla
     /// ************************************************************************************************************
@@ -476,7 +399,6 @@ int main(int argc, char **argv)
                     "verticalMomentSecondOrder pointsNumber\n";
 
     int numVehicles{0}, numWalkers{0}, numRoads{0};
-//    int thresVehicles{1000}, thresWalkers{1000}, thresRoads{0};
     int thresVehicles{0}, thresWalkers{45}, thresRoads{0};
     Helpers hp;
 
@@ -526,50 +448,6 @@ int main(int argc, char **argv)
         VecArray eachBox;
         std::vector<int> categories;
 
-//        for (unsigned int i=0; i<vehicleCorners.size(); i+=8) {
-//            eachBox.clear();
-//            eachBox.emplace_back(vehicleCorners[i]); eachBox.emplace_back(vehicleCorners[i+1]);
-//            eachBox.emplace_back(vehicleCorners[i+2]); eachBox.emplace_back(vehicleCorners[i+3]);
-//            eachBox.emplace_back(vehicleCorners[i+4]); eachBox.emplace_back(vehicleCorners[i+5]);
-//            eachBox.emplace_back(vehicleCorners[i+6]); eachBox.emplace_back(vehicleCorners[i+7]);
-//
-//            /// find the points that fall in each box
-//            int num{0};
-//            VecArray tmpV;
-//            for (auto p: points) {
-//                if (hp.pointInBox(p, eachBox)) {
-//                    tmpV.emplace_back(p);
-//                    num++;
-//                }
-//            }
-////            std::cout << "num = " << num << std::endl;
-//            if (num >= minPointsVehicle) {
-//                if (numVehicles < thresVehicles) {
-//                    vehicle.clear();
-//
-//                    for (auto& v : tmpV)
-//                        vehicle.emplace_back(v);
-//
-//                    /// extract features for this object
-//                    categories.clear();
-//                    Classifier cl(classifierPath);
-//
-//                    int res = cl.run(vehicle);
-//                    /// vehicle
-//                    if (res == 0)
-//                        true_vehicle++;
-//                    /// walker
-//                    if (res == 1)
-//                        vehicle_for_walker++;
-//                    /// road
-//                    if (res == 2)
-//                        vehicle_for_road++;
-//
-//                    numVehicles++;
-//                }
-//            }
-//        }
-
         /// find points of walkers inside box
         for (unsigned int i=0; i<walkerCorners.size(); i+=8) {
             eachBox.clear();
@@ -612,52 +490,6 @@ int main(int argc, char **argv)
                 }
             }
         }
-
-//        /// find points of roads inside box
-//        for (unsigned int i=0; i<roadCorners.size(); i+=8) {
-//            eachBox.clear();
-//            eachBox.emplace_back(roadCorners[i]); eachBox.emplace_back(roadCorners[i+1]);
-//            eachBox.emplace_back(roadCorners[i+2]); eachBox.emplace_back(roadCorners[i+3]);
-//            eachBox.emplace_back(roadCorners[i+4]); eachBox.emplace_back(roadCorners[i+5]);
-//            eachBox.emplace_back(roadCorners[i+6]); eachBox.emplace_back(roadCorners[i+7]);
-//
-//            /// find the points that fall in each box
-//            int num{0};
-//            VecArray tmpR;
-//            for (auto p: points) {
-//                if (hp.pointInBox(p, eachBox)) {
-//                    if (p.z <= -2.9) { /// TODO need to validate function hp.pointInBox in order to remove this threshold
-//                        tmpR.emplace_back(p);
-//                        num++;
-//                    }
-//                }
-//            }
-//            if (num >= minPointsRoad) {
-//                if (numRoads < thresRoads) {
-//                    road.clear();
-//
-//                    for (auto& v : tmpR)
-//                        road.emplace_back(v);
-//
-//                    /// extract features for this object
-//                    categories.clear();
-//                    Classifier cl(classifierPath);
-//                    int res = cl.run(road);
-//                    /// vehicle
-//                    if (res == 0)
-//                        road_for_vehicle++;
-//                    /// walker
-//                    if (res == 1)
-//                        road_for_walker++;
-//                    /// road
-//                    if (res == 2)
-//                        true_road++;
-//
-//                    numRoads++;
-//                }
-//            }
-//        }
-
 
         iteration++;
     }
@@ -805,17 +637,7 @@ int main(int argc, char **argv)
     unsigned int frame_id=frameStart;
 
     std::vector<std::string> all_paths;
-//    std::string path = "/home/andreas/Dropbox/Datasets/Lyft_dataset/nuscenes-devkit-master/python-sdk/data/sets/nuscenes/lidar";
-//    for (const auto & entry : fs::directory_iterator(path))
-//        all_paths.emplace_back(entry.path());
 
-//    std::ifstream infile("/home/andreas/Desktop/all_lidar_paths.txt");
-//    std::string line;
-//    while (std::getline(infile, line)) {
-//        all_paths.emplace_back(line);
-//    }
-
-//    for (unsigned int frame_id=0; frame_id<all_paths.size(); frame_id+=step) {
     for (unsigned int frame_id=frameStart; frame_id<frameEnd; frame_id+=step) {
         CurbDetection curbDetect;
         stopped = false;
@@ -836,11 +658,6 @@ int main(int argc, char **argv)
             /// ************************************************************************************************************
             /// read lidar top data from lyft
             /// ************************************************************************************************************
-//            std::string filePathLidarTop = pathTolyftData + samples[frame_id].LidarTopPath;
-//            std::cout << "yaw = " << samples[frame_id].yaw << std::endl;
-
-//            std::string filePathLidarTop = "/home/andreas/Dropbox/Datasets/Lyft_dataset/nuscenes-devkit-master/python-sdk/data/sets/nuscenes/lidar/host-a101_lidar1_1241216089202636746.bin";
-//            std::string filePathLidarTop = "/home/andreas/Desktop/data/input_lidar_points.bin";
             std::string filePathLidarTop = all_paths[frame_id];
 
             std::cout << "yaw = " << samples[frame_id].yaw << std::endl;
@@ -1058,10 +875,6 @@ int main(int argc, char **argv)
                     u.dx() = vehicle_pos[iter].x - vehicle_pos[iter-1].x;
                     u.dy() = vehicle_pos[iter].y - vehicle_pos[iter-1].y;
                     u.yaw() = (extrinsics[iter].y - extrinsics[iter-1].y) * M_PI / 180.0f;
-
-//                    u.dx() = 0.0f;
-//                    u.dy() = 0.0f;
-//                    u.yaw() = 0.0f;
 
                     /// Simulate system
                     x = sys.f(x, u);
@@ -1315,22 +1128,7 @@ int main(int argc, char **argv)
             #endif
         }
 
-
-        /// ****************************************************************************************************************
-
-        #if CARLA_DATA == 1
-//            std::cout << "store image to " << storage_path + prefix + std::to_string(frame_id)+".png" << std::endl;
-//            cv::imwrite(storage_path + prefix + std::to_string(frame_id)+".png", img);
-        #endif
-
-        #if LYFT_DATA == 1
-//                filename.replace(filename.begin(),filename.begin()+104,"");
-//                filename.replace(filename.begin()+35, filename.end(),"png");
-//                std::cout << "store image to " << storage_path + filename << std::endl;
-//                cv::imwrite(storage_path + filename, img); /// lyft
-        #endif
-
-        iter+=1; /// increase counter by two
+        iter+=1;
 
     #if RECORD == 0
         } /// frames iteration
@@ -1512,18 +1310,7 @@ int main(int argc, char **argv)
             }
 
 
-//            imageObjects.clear();
-//            hp2.projectToIm(object, imageObjects, calib, v);
-//            for (auto &p : imageObjects) {
-//                z = round(p.x);
-//                y = round(p.y);
-//                cv::circle(img, cv::Point(z,y), 1.0, cv::Scalar(128, 64, 128), 10);
-//            }
-            /// ****************************************************************************************************************
-
-//            cv::imwrite(storage_path + prefix + std::to_string(frame_id)+".png", img);
-
-            iter+=1; /// increase counter by two
+            iter+=1;
 
 #if RECORD == 0
         } /// frames iteration
@@ -1632,90 +1419,6 @@ int main(int argc, char **argv)
 #endif
 
 #if SPHERICAL_NEIGHBORHOOD == 1
-        /*
-    std::vector<types> categories;
-                std::stringstream trainingData;
-
-                /// define point cloud
-                pointCloudBoost cloud(new pointCloud), neighbors(new pointCloud);
-
-                /// resize space for point cloud
-                cloud->width = (pointsSize/dimensions)/sizeof(float); cloud->height = 1;
-                cloud->points.resize (cloud->width * cloud->height);
-
-                /// fill point cloud with data
-                int indPoint{0};
-                for (auto & point : cloud->points) {
-                    point.x = *(points+indPoint); point.y = *(points+indPoint+1); point.z = *(points+indPoint+2);
-                    indPoint+=3;
-                }
-
-                SphericalNeighborhood sNeighbors;
-
-                /// TODO must optimize these parameters => (initialR, smallestRadius, ratio, scalesNum)
-                float initialR{15.0f}, smallestRadius{0.6f}, ratio{1.25f};
-                unsigned int scalesNum{12};
-                sNeighbors.init(initialR, scalesNum, smallestRadius, ratio, cloud);
-
-                std::vector<GeometricFeatures> geometricFeatures;
-                VecArray boxCorners;
-                int index;
-                vec c;
-
-                trainingData << "type eigenvaluesSum omnivariance eigenentropy linearity planarity sphericity curvatureChange "
-                                "verticalityFirstEigenvectorAxisZ verticalityThirdEigenvectorAxisZ absoluteMomentFirstOrderE1 "
-                                "absoluteMomentFirstOrderE2 absoluteMomentFirstOrderE3 absoluteMomentSecondOrderE1 "
-                                "absoluteMomentSecondOrderE2 absoluteMomentSecondOrderE3 verticalMomentFirstOrder "
-                                "verticalMomentSecondOrder pointsNumber\n";
-
-                for (unsigned int i=0; i<boxes.size(); i++) {
-                    //           std::cout << "new box and cloud size = " << cloud->points.size() << std::endl;
-                    boxCorners = boxes[i].corners;
-                    c = getCenter(boxCorners);
-                    sNeighbors.setCenter(c);
-                    sNeighbors.setCloud(cloud);
-
-                    if (existInVector(categories, boxes[i].category) == -1) {
-                        categories.emplace_back(boxes[i].category, categories.size());
-                        index = categories.size()-1;
-                    }
-                    else {
-                        for (auto &p : categories)
-                            if (p.name == boxes[i].category)
-                                index = p.index;
-                    }
-
-                    sNeighbors.run(geometricFeatures, trainingData, index);
-                }
-
-                std::ofstream myfile;
-                myfile.open ("trainingData.dat");
-                myfile << trainingData.str();
-                myfile.close();
-
-                float *neighborsPoints;
-                int neighborsSize{0};
-                #if DRAW_NEIGHBORS == 1
-                    sNeighbors.getNeighbors(neighbors);
-                            int NumNeighbors = neighbors->width*neighbors->height;
-                            int rgbValues{3};
-                            neighborsSize = (dimensions + rgbValues) * NumNeighbors * sizeof(float); /// dimensions declare that we have 3d points
-
-                            /// increase neighborsSize in order to add the center point with its color
-                            neighborsSize += 6* sizeof(float);
-                            /// neighborsPoints stores all neighbors (3d points with its rgb color) and leaves more 6 floats empty for the center point
-
-                            neighborsPoints = renderer.setData(neighbors, vec(1.0f, 0.0f, 0.0f), neighborsSize/sizeof(float));
-
-                            /// add center to neighborsPoints and draw using another color
-                            int ind = neighborsSize/ sizeof(float) - 6; /// get the appropriate index in order to add the center point
-                            vec center = sNeighbors.getCenter();
-                            *(neighborsPoints+ind) = center.x; *(neighborsPoints+ind+1) = center.y; *(neighborsPoints+ind+2) = center.z;
-                            *(neighborsPoints+ind+3) = 0.0f; *(neighborsPoints+ind+4) = 1.0f; *(neighborsPoints+ind+5) = 0.0f;
-                #endif
-                */
-
-
         int size = (trainData.size() + 1) * dimensions * 2; /// +1 refers to trainCenter, *2 refers to colours
         auto* sphericalData = new float[size];
 
@@ -1762,20 +1465,15 @@ int main(int argc, char **argv)
 #if DRAW_RINGS == 1
         int counterRings{0};
             for (unsigned int i=0; i<rings; i++)
-//            for (unsigned int i=17; i<18; i++)
                 counterRings += ringIndices[i].size();
 
             auto ringPoints = new float[counterRings * 2 * dimensions];
             int ringPointsSize = counterRings * 2 * dimensions * sizeof(float);
             int indexRings, idRings{0};
             for (unsigned int i=0; i<rings; i++) {
-//            for (unsigned int i=17; i<18; i++) {
 
                 for (unsigned j=0; j<ringIndices[i].size(); j++) {
 
-//                    std::cout << ringIndices[i].size() << std::endl;
-
-//                    indexRings = ringIndices[i][j].first;
                     indexRings = std::get<0>(ringIndices[i][j]); /// extract id from tuple
                     *(ringPoints+idRings) = totalGroundV1[indexRings].x;
                     *(ringPoints+idRings+1) = totalGroundV1[indexRings].y;
@@ -2208,16 +1906,6 @@ int main(int argc, char **argv)
                 idGround += 3;
             }
 
-//        auto groundV1Points = new float[totalGroundV2.size() * dimensions];
-//            int groundV1PointsSize = totalGroundV2.size() * dimensions * sizeof(float);
-//            int idGround{0};
-//            for (unsigned int i=0; i<totalGroundV2.size(); i++) {
-//                *(groundV1Points+idGround) = totalGroundV2[i].x;
-//                *(groundV1Points+idGround+1) = totalGroundV2[i].y;
-//                *(groundV1Points+idGround+2) = totalGroundV2[i].z;
-//                idGround += 3;
-//            }
-
             VertexArray vaGroundV1;
             VertexBuffer vbGroundV1(groundV1Points, groundV1PointsSize); /// size is the amount of bytes of all instances
             VertexBufferLayout layoutGroundV1;
@@ -2237,16 +1925,6 @@ int main(int argc, char **argv)
 #endif
 
 #if DRAW_NON_GROUND_V1 == 1
-//        auto nonGroundV1Points = new float[totalNoGroundV1.size() * dimensions];
-//            int nonGroundV1PointsSize = totalNoGroundV1.size() * dimensions * sizeof(float);
-//            int idNonGround{0};
-//            for (unsigned int i=0; i<totalNoGroundV1.size(); i++) {
-//                *(nonGroundV1Points+idNonGround) = totalNoGroundV1[i].x;
-//                *(nonGroundV1Points+idNonGround+1) = totalNoGroundV1[i].y;
-//                *(nonGroundV1Points+idNonGround+2) = totalNoGroundV1[i].z;
-//                idNonGround += 3;
-//            }
-
             auto nonGroundV1Points = new float[totalNoGroundV2.size() * dimensions];
             int nonGroundV1PointsSize = totalNoGroundV2.size() * dimensions * sizeof(float);
             int idNonGround{0};
@@ -2422,11 +2100,6 @@ int main(int argc, char **argv)
 #if DRAW_PLANE == 1
         float u = 10.0f, v = 10.0f;
             math::vec refOrigin{0.0f, 0.0f, 0.0f};
-            /// modelPlaneV1
-//            math::vec p0(planeDraw.Point(-u, -v, refOrigin));
-//            math::vec p1(planeDraw.Point(-u, v, refOrigin));
-//            math::vec p2(planeDraw.Point(u, -v, refOrigin));
-//            math::vec p3(planeDraw.Point(u, v, refOrigin));
 
             math::vec p0(planeDraw.Point(-u, -v,  planeDraw.PointOnPlane()));
             math::vec p1(planeDraw.Point(-u, v,  planeDraw.PointOnPlane()));
@@ -2525,7 +2198,7 @@ int main(int argc, char **argv)
         /// ***************************************************************
 
     #if RECORD == 1
-            } /// frames iteration
+            // } /// frames iteration
         } /// glfwWindowShouldClose
     #endif
 
